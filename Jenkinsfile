@@ -19,7 +19,7 @@ node('docker') {
     tmpDir = sh(script: "mktemp -d --tmpdir=$WORKSPACE", returnStdout: true).trim()
     experimentNamespace = "bookinfo-dev-$branchName"
     stage('Deploy') {
-      if (env.BRANCH_NAME != 'master') {
+      if ("$branchName" != 'master') {
         withEnv(["BINDIR=$tmpDir"]) {
           sh '''
              kubectl=$BINDIR'/kubectl'
@@ -33,6 +33,28 @@ node('docker') {
         }
       } else {
         sh "echo 'Skipping deploy for master branch' "
+      }
+    }
+    experimentName = "bookinfo-$branchName"
+    baselineNamespace = "default"
+    service = "productpage"
+    stage('Aspen Experiment') {
+      if (env.BRANCH_NAME != 'master') {
+        withEnv(["BINDIR=$tmpDir"]) {
+          copyArtifacts(projectName: 'apiserver/master',
+                        filter: '_build/canonical/cross/aspenctl-linux-amd64',
+                        selector: lastSuccessful(), target: "$tmpDir", flatten: true)
+          sh '''
+            aspenctl=$BINDIR'/aspenctl'
+            mv $BINDIR'/aspenctl-linux-amd64' $aspenctl
+            chmod +x $aspenctl
+          '''
+          withCredentials([string(credentialsId: 'dummy_user_agent_token', variable: 'TOKEN')]) {
+            sh "./create-experiment.sh $experimentName $baselineNamespace $experimentNamespace $service"
+          }
+        }
+      } else {
+        sh "echo 'Skipping aspen experiment for master branch' "
       }
     }
   } catch (e) {
