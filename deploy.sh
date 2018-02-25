@@ -39,7 +39,7 @@ fi
 
 repository=$1
 tag=$2
-experimentNamespace=$3
+experimentNamespace=$(echo "$3" | tr '[:upper:]' '[:lower:]')
 
 name=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
 version=$name

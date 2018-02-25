@@ -3,7 +3,8 @@ node('docker') {
     properties([disableConcurrentBuilds()])
 
     repository = "quay.io/aspenmesh/bookinfo-private"
-    version = "${env.BRANCH_NAME}-${env.BUILD_ID}"
+    branchName = env.BRANCH_NAME.toLowerCase()
+    version = "$branchName-${env.BUILD_ID}"
 
     stage('Checkout') {
       checkout scm
@@ -16,7 +17,7 @@ node('docker') {
     }
 
     tmpDir = sh(script: "mktemp -d --tmpdir=$WORKSPACE", returnStdout: true).trim()
-    experimentNamespace = "bookinfo-dev"
+    experimentNamespace = "bookinfo-dev-$branchName"
     stage('Deploy') {
       if (env.BRANCH_NAME != 'master') {
         withEnv(["BINDIR=$tmpDir"]) {
