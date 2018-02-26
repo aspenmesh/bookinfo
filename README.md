@@ -3,7 +3,7 @@ See https://istio.io/docs/guides/bookinfo.html.
 
 ## Build docker images without pushing
 ```
-src/build-services.sh <version>
+src/build-services.sh <repository> <tag>
 ```
 
 The bookinfo versions are different from Istio versions since the sample should work with any version of Istio.
@@ -16,7 +16,7 @@ sed -i "s/\(istio\/examples-bookinfo-.*\):[[:digit:]]\.[[:digit:]]\.[[:digit:]]/
 ## Push docker images to docker hub
 One script to build the docker images, push them to docker hub and to update the yaml files
 ```
-build_push_update_images.sh <version>
+build_push_update_images.sh <repository> <tag>
 ```
 
 ## Tests
