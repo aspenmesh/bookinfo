@@ -27,7 +27,7 @@ node('docker') {
              chmod +x $kubectl
           '''
 
-          withCredentials([file(credentialsId: 'dummy_k8s_cluster_jenkins_config', variable: 'KUBECONFIG')]) {
+          withCredentials([file(credentialsId: 'blue_demo_k8s_cluster_jenkins_config', variable: 'KUBECONFIG')]) {
             sh "./deploy.sh $repository $version $experimentNamespace"
           }
         }
@@ -37,7 +37,8 @@ node('docker') {
     }
     experimentName = "bookinfo-$branchName"
     baselineNamespace = "default"
-    service = "productpage"
+    service1 = "productpage"
+    service2 = "reviews"
     stage('Aspen Experiment') {
       if (env.BRANCH_NAME != 'master') {
         withEnv(["BINDIR=$tmpDir"]) {
@@ -49,8 +50,8 @@ node('docker') {
             mv $BINDIR'/aspenctl-linux-amd64' $aspenctl
             chmod +x $aspenctl
           '''
-          withCredentials([string(credentialsId: 'dummy_user_agent_token', variable: 'TOKEN')]) {
-            sh "./create-experiment.sh $experimentName $baselineNamespace $experimentNamespace $service"
+          withCredentials([string(credentialsId: 'blue_demo_agent_token', variable: 'TOKEN')]) {
+            sh "./create-experiment.sh $experimentName $baselineNamespace $experimentNamespace $service1 $service2"
           }
         }
       } else {

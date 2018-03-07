@@ -8,33 +8,33 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
-  name: productpage
+  name: reviews
   namespace: <experiment-namespace>
   labels:
-    app: productpage
+    app: reviews
 spec:
   ports:
   - port: 9080
     name: http
   selector:
-    app: productpage
+    app: reviews
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: productpage-v1
+  name: reviews
   namespace: <experiment-namespace>
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: productpage
+        app: reviews
         version: <version>
     spec:
       containers:
-      - name: productpage
-        image: <image-registry>/examples-bookinfo-productpage-v1:<image-tag>
+      - name: reviews
+        image: <image-registry>/examples-bookinfo-reviews-v3:<image-tag>
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
