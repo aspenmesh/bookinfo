@@ -44,9 +44,9 @@ app.logger.setLevel(logging.DEBUG)
 from flask_bootstrap import Bootstrap
 Bootstrap(app)
 
-details_name = "http://details:9080"
-reviews_name = "http://reviews:9080"
-ratings_name = "http://ratings:9080"
+details_name = "http://details.default.svc.cluster.local:9080"
+reviews_name = "http://reviews.default.svc.cluster.local:9080"
+ratings_name = "http://ratings.default.svc.cluster.local:9080"
 
 details = {
     "name" : details_name,
@@ -255,9 +255,9 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     p = int(sys.argv[1])
-    details_name = sys.argv[2]
-    reviews_name = sys.argv[3]
-    ratings_name = sys.argv[4]
+    details['name'] = details_name = sys.argv[2]
+    reviews['name'] = reviews_name = sys.argv[3]
+    ratings['name'] = ratings_name = sys.argv[4]
     sys.stderr = Writer('stderr.log')
     sys.stdout = Writer('stdout.log')
     print "start at port %s" % (p)
