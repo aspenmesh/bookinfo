@@ -46,7 +46,7 @@ Bootstrap(app)
 
 details_name = "http://details:9080"
 reviews_name = "http://reviews:9080"
-rating_name = "http://ratings:9080"
+ratings_name = "http://ratings:9080"
 
 details = {
     "name" : details_name,
