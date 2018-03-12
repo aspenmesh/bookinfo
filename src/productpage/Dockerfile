@@ -22,4 +22,4 @@ COPY templates /opt/microservices/templates
 COPY requirements.txt /opt/microservices/
 EXPOSE 9080
 WORKDIR /opt/microservices
-CMD python productpage.py 9080
+CMD python productpage.py 9080 "http://details.default.svc.cluster.local:9080" "http://reviews.default.svc.cluster.local:9080" "http://ratings.default.svc.cluster.local:9080"

@@ -44,20 +44,24 @@ app.logger.setLevel(logging.DEBUG)
 from flask_bootstrap import Bootstrap
 Bootstrap(app)
 
+details_name = "http://details:9080"
+reviews_name = "http://reviews:9080"
+rating_name = "http://ratings:9080"
+
 details = {
-    "name" : "http://details:9080",
+    "name" : details_name,
     "endpoint" : "details",
     "children" : []
 }
 
 ratings = {
-    "name" : "http://ratings:9080",
+    "name" : ratings_name,
     "endpoint" : "ratings",
     "children" : []
 }
 
 reviews = {
-    "name" : "http://reviews:9080",
+    "name" : reviews_name,
     "endpoint" : "reviews",
     "children" : [ratings]
 }
@@ -246,11 +250,14 @@ class Writer(object):
         self.file.flush()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print "usage: %s port" % (sys.argv[0])
+    if len(sys.argv) < 5:
+        print "usage: %s port details_svc_name reviews_svc_name ratings_svc_name" % (sys.argv[0])
         sys.exit(-1)
 
     p = int(sys.argv[1])
+    details_name = sys.argv[2]
+    reviews_name = sys.argv[3]
+    ratings_name = sys.argv[4]
     sys.stderr = Writer('stderr.log')
     sys.stdout = Writer('stdout.log')
     print "start at port %s" % (p)
