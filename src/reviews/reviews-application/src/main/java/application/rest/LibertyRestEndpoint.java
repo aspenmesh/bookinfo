@@ -16,6 +16,10 @@
 package application.rest;
 
 import java.io.StringReader;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Date;
+import java.util.Collections;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -43,6 +47,39 @@ public class LibertyRestEndpoint extends Application {
     private final static Boolean ratings_enabled = Boolean.valueOf(System.getenv("ENABLE_RATINGS"));
     private final static String star_color = System.getenv("STAR_COLOR") == null ? "black" : System.getenv("STAR_COLOR");
     private final static String ratings_service = System.getenv("RATINGS_SERVICE") == null ? "http://ratings:9080/ratings" : System.getenv("RATINGS_SERVICE");
+    private final static long refetchAgeMs = 15 * 1000;
+
+    protected class RatingsCacheEntry {
+      public RatingsCacheEntry(JsonObject _j, long _f) {
+        this.json = _j;
+        this.fetched = _f;
+      }
+      public JsonObject json;
+      public long fetched;
+    }
+    private static Map<String, RatingsCacheEntry> ratingsCache =
+      Collections.synchronizedMap(
+          new HashMap<String, RatingsCacheEntry>()
+      );
+    protected JsonObject getRatingFromCache(String productId) {
+      RatingsCacheEntry e = ratingsCache.get(productId);
+      if (e == null) {
+        return null;
+      }
+      long now = (new Date()).getTime();
+      if (e.fetched + refetchAgeMs < now) {
+        System.out.println("Expiring " + productId + " from the cache (" +
+            ratingsCache.size() + ")");
+        return null;
+      }
+      return e.json;
+    }
+    protected void storeRatingToCache(String productId, JsonObject json) {
+      RatingsCacheEntry e = new RatingsCacheEntry(json, (new Date()).getTime());
+      ratingsCache.put(productId, e);
+      System.out.println("Stored ratings for " + productId + " to cache (" +
+          ratingsCache.size() + ")");
+    }
     
     private String getJsonResponse (String productId, int starsReviewer1, int starsReviewer2) {
     	String result = "{";
@@ -85,6 +122,13 @@ public class LibertyRestEndpoint extends Application {
     
     private JsonObject getRatings(String productId, Cookie user, String xreq, String xtraceid, String xspanid,
                                   String xparentspanid, String xsampled, String xflags, String xotspan){
+      // See if we have this result in the cache.
+      JsonObject cachedRatings = this.getRatingFromCache(productId);
+      if (cachedRatings != null) {
+        System.out.println("Returning request for " + productId + " from the cache");
+        return cachedRatings;
+      }
+
       ClientBuilder cb = ClientBuilder.newBuilder();
       String timeout = star_color.equals("black") ? "10000" : "2500";
       cb.property("com.ibm.ws.jaxrs.client.connection.timeout", timeout);
@@ -122,6 +166,10 @@ public class LibertyRestEndpoint extends Application {
         StringReader stringReader = new StringReader(r.readEntity(String.class));
         try (JsonReader jsonReader = Json.createReader(stringReader)) {
            JsonObject j = jsonReader.readObject();
+
+           // Store to cache.
+           this.storeRatingToCache(productId, j);
+
            return j;
         }
       }else{
