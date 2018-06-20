@@ -258,8 +258,6 @@ if __name__ == '__main__':
     details['name'] = details_name = sys.argv[2]
     reviews['name'] = reviews_name = sys.argv[3]
     ratings['name'] = ratings_name = sys.argv[4]
-    sys.stderr = Writer('stderr.log')
-    sys.stdout = Writer('stdout.log')
     print "start at port %s" % (p)
     app.run(host='0.0.0.0', port=p, debug=True, threaded=True)
 
