@@ -39,7 +39,7 @@ popd
 
 pushd $SCRIPTDIR/reviews
   #java build the app.
-  docker run --rm -v `pwd`:/usr/bin/app:rw niaquinto/gradle clean build
+  docker run --rm -v `pwd`:/root:rw frekele/gradle:3.3-jdk8 gradle clean build
   pushd reviews-wlpcfg
     #plain build -- no ratings
     docker build -t $REPOSITORY:examples-bookinfo-reviews-v1-${TAG} --build-arg service_version=v1 .
